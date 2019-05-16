@@ -1,12 +1,6 @@
 import torch
 import torch.nn as nn
 from torch.nn import init
-from torch.autograd import Variable
-import torch.utils.data as Data
-import argparse
-from utils import *
-
-torch.manual_seed(1)
 
 
 class AutoEncoder(nn.Module):
