@@ -4,7 +4,7 @@ import torch.nn as nn
 from torch.utils.data import Dataset, DataLoader
 import os
 from tqdm import tqdm
-from models.autoencoder import AutoEncoder
+from models.autoencoder import MultichannelAutoEncoder, GatedMultichannelAutoEncoder
 
 
 class FeatureDataset(Dataset):
@@ -57,7 +57,7 @@ if __name__ == '__main__':
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-    autoencoder = AutoEncoder(word_dim, word_dim1, word_dim2, image_dim, image_dim1, image_dim2, multi_dim).to(device)
+    autoencoder = GatedMultichannelAutoEncoder(word_dim, word_dim1, word_dim2, image_dim, image_dim1, image_dim2, multi_dim).to(device)
     optimizer = torch.optim.Adam(autoencoder.parameters(), lr=lr)
     loss_func = nn.MSELoss()
 
@@ -80,5 +80,5 @@ if __name__ == '__main__':
             if i_batch % 100 == 0:
                 pbar.set_postfix(loss=loss.item())
 
-    torch.save(autoencoder.state_dict(), result_file)
+    torch.save(autoencoder.state_dict(), autoencoder.__class__.__name__ + '.pth')
 
