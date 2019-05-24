@@ -1,9 +1,10 @@
-from torch.autograd import Variable
+import numpy as np
+import torch
+import torch.nn as nn
 from torch.utils.data import Dataset, DataLoader
 import os
 from tqdm import tqdm
-from utils import *
-from autoencoder import *
+from models.autoencoder import AutoEncoder
 
 
 class FeatureDataset(Dataset):
@@ -38,6 +39,7 @@ class FeatureDataset(Dataset):
 
 if __name__ == '__main__':
     data_file = os.path.join('..', 'data', 'glove.300d.vgg.512d.txt')
+    result_file = os.path.join('..', 'result', 'autoencoder.pth')
     batch_size = 64
     num_epochs = 300
     lr = 1e-3
@@ -77,4 +79,6 @@ if __name__ == '__main__':
 
             if i_batch % 100 == 0:
                 pbar.set_postfix(loss=loss.item())
+
+    torch.save(autoencoder.state_dict(), result_file)
 
