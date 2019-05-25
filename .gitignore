@@ -1,6 +1,7 @@
 venv/
-.idea
-*/__pycache__/
+.idea/
+__pycache__/
 
 data/
 result/
+state/

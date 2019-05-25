@@ -6,21 +6,18 @@ from sklearn.cluster import KMeans
 from sklearn import metrics
 
 
-EPSILON = 1e-6
-
-
 def euclidean(vec1, vec2):
     diff = vec1 - vec2
     return math.sqrt(diff.dot(diff))
 
 
-def cosine_sim(vec1, vec2):
-    vec1 += EPSILON * np.ones(len(vec1))
-    vec2 += EPSILON * np.ones(len(vec2))
+def cosine_sim(vec1, vec2, eps=1e-6):
+    vec1 += eps
+    vec2 += eps
     return vec1.dot(vec2) / (np.linalg.norm(vec1) * np.linalg.norm(vec2))
 
 
-def assingn_ranks(item_dict):
+def assign_ranks(item_dict):
     ranked_dict = {}
     sorted_list = [(key, val) for (key, val) in sorted(item_dict.items(),
                                                        key=itemgetter(1),
@@ -64,44 +61,44 @@ def spearmans_rho(ranked_dict1, ranked_dict2):
     return numr / math.sqrt(den1 * den2)
 
 
-def eval_category(word_vecs):
-    labels_true = []
-    labels_word = []
-
-    cat0 = yaml.load(open('evaluation/mcrae_typicality.yaml'))
-
-    emb = {}
-    nn = 0
-    for line in word_vecs:
-        emb[nn] = line
-        nn += 1
-
-    cat = {}
-    vv = {}
-    num = 0
-
-    for i in cat0:
-        if not i in cat:
-            cat[i] = []
-            vv[i] = num
-            num += 1
-        for j in cat0[i]:
-            if j in emb.keys:
-                cat[i].append(j)
-                labels_true.append(vv[i])
-                labels_word.append(j)
-
-    X = []
-    for w in labels_word:
-        X.append(emb[w])
-
-    X = np.array(X)
-
-    kmeans = KMeans(n_clusters=41, random_state=0).fit(X)
-    labels_pred = list(kmeans.labels_)
-
-    r1 = metrics.adjusted_rand_score(labels_true, labels_pred),
-    r2 = metrics.adjusted_mutual_info_score(labels_true, labels_pred),
-    r3 = metrics.normalized_mutual_info_score(labels_true, labels_pred)
-
-    return r1, r2, r3
+# def eval_category(word_vecs):
+#     labels_true = []
+#     labels_word = []
+#
+#     cat0 = yaml.load(open('evaluation/mcrae_typicality.yaml'))
+#
+#     emb = {}
+#     nn = 0
+#     for line in word_vecs:
+#         emb[nn] = line
+#         nn += 1
+#
+#     cat = {}
+#     vv = {}
+#     num = 0
+#
+#     for i in cat0:
+#         if not i in cat:
+#             cat[i] = []
+#             vv[i] = num
+#             num += 1
+#         for j in cat0[i]:
+#             if j in emb.keys:
+#                 cat[i].append(j)
+#                 labels_true.append(vv[i])
+#                 labels_word.append(j)
+#
+#     X = []
+#     for w in labels_word:
+#         X.append(emb[w])
+#
+#     X = np.array(X)
+#
+#     kmeans = KMeans(n_clusters=41, random_state=0).fit(X)
+#     labels_pred = list(kmeans.labels_)
+#
+#     r1 = metrics.adjusted_rand_score(labels_true, labels_pred),
+#     r2 = metrics.adjusted_mutual_info_score(labels_true, labels_pred),
+#     r3 = metrics.normalized_mutual_info_score(labels_true, labels_pred)
+#
+#     return r1, r2, r3

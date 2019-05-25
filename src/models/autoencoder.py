@@ -20,6 +20,11 @@ class MultichannelAutoEncoder(nn.Module):
         self.idim2 = image_dim2
         self.zdim = multi_dim
 
+        self.word_to_image = nn.Sequential(
+            nn.Linear(self.wdim, self.idim),
+            nn.Tanh()
+        )
+
         self.word_encoder = nn.Sequential(
             nn.Linear(self.wdim, self.wdim1),
             nn.Tanh(),
@@ -65,14 +70,26 @@ class MultichannelAutoEncoder(nn.Module):
                     self.multi_encoder, self.multi_decoder]:
             net.apply(init_weights)
 
-    def forward(self, x_w, x_i):
+    def feature(self, x_w, x_i=None):
+        mapped_image = self.word_to_image(x_w)
+
+        if not self.training:
+            x_i = mapped_image
+        elif x_i is None:
+            raise ValueError('Image vector is required when training')
+
         encoded_word = self.word_encoder(x_w)
         encoded_image = self.image_encoder(x_i)
         encoded = self.multi_encoder(torch.cat((encoded_word, encoded_image), dim=1))
+        return encoded, mapped_image
+
+    def forward(self, x_w, x_i):
+        encoded, mapped_image = self.feature(x_w, x_i)
+
         decoded = self.multi_decoder(encoded)
         decoded_word = self.word_decoder(decoded[:, :self.wdim2])
         decoded_image = self.image_decoder(decoded[:, -self.idim2:])
-        return decoded_word, decoded_image, encoded
+        return decoded_word, decoded_image, encoded, mapped_image
 
 
 class GatedMultichannelAutoEncoder(nn.Module):
@@ -85,6 +102,11 @@ class GatedMultichannelAutoEncoder(nn.Module):
         self.idim1 = image_dim1
         self.idim2 = image_dim2
         self.zdim = multi_dim
+
+        self.word_to_image = nn.Sequential(
+            nn.Linear(self.wdim, self.idim),
+            nn.Tanh()
+        )
 
         self.word_gate = nn.Sequential(
             nn.Linear(self.wdim, 1),
@@ -142,7 +164,14 @@ class GatedMultichannelAutoEncoder(nn.Module):
                     self.multi_encoder, self.multi_decoder]:
             net.apply(init_weights)
 
-    def forward(self, x_w, x_i):
+    def feature(self, x_w, x_i=None):
+        mapped_image = self.word_to_image(x_w)
+
+        if not self.training:
+            x_i = mapped_image
+        elif x_i is None:
+            raise ValueError('Image vector is required when training')
+
         word_gate = self.word_gate(x_w).expand_as(x_w)
         image_gate = self.image_gate(x_i).expand_as(x_i)
         x_w = word_gate * x_w
@@ -150,7 +179,11 @@ class GatedMultichannelAutoEncoder(nn.Module):
         encoded_word = self.word_encoder(x_w)
         encoded_image = self.image_encoder(x_i)
         encoded = self.multi_encoder(torch.cat((encoded_word, encoded_image), dim=1))
+        return encoded, mapped_image
+
+    def forward(self, x_w, x_i):
+        encoded, mapped_image = self.feature(x_w, x_i)
         decoded = self.multi_decoder(encoded)
         decoded_word = self.word_decoder(decoded[:, :self.wdim2])
         decoded_image = self.image_decoder(decoded[:, -self.idim2:])
-        return decoded_word, decoded_image, encoded
+        return decoded_word, decoded_image, encoded, mapped_image

@@ -39,7 +39,7 @@ class FeatureDataset(Dataset):
 
 if __name__ == '__main__':
     data_file = os.path.join('..', 'data', 'glove.300d.vgg.512d.txt')
-    result_file = os.path.join('..', 'result', 'autoencoder.pth')
+    state_dir = os.path.join('..', 'result')
     batch_size = 64
     num_epochs = 300
     lr = 1e-3
@@ -69,16 +69,20 @@ if __name__ == '__main__':
             batch_words = batch_words.float().to(device)
             batch_images = batch_images.float().to(device)
 
-            decoded_words, decoded_images, _ = autoencoder(batch_words, batch_images)
+            decoded_words, decoded_images, _, mapped_image = autoencoder(batch_words, batch_images)
 
             loss = loss_func(decoded_words, batch_words) + loss_func(decoded_images, batch_images)
+            mapping_loss = loss_func(mapped_image, batch_images)
 
             optimizer.zero_grad()
-            loss.backward()
+            (loss + mapping_loss).backward()
             optimizer.step()
 
             if i_batch % 100 == 0:
-                pbar.set_postfix(loss=loss.item())
+                pbar.set_postfix(loss=loss.item(), mapping_loss=mapping_loss.item())
 
-    torch.save(autoencoder.state_dict(), autoencoder.__class__.__name__ + '.pth')
+    torch.save(
+        autoencoder.state_dict(),
+        os.path.join(state_dir, autoencoder.__class__.__name__ + '.pth')
+    )
 
