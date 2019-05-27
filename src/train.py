@@ -4,7 +4,7 @@ import torch.nn as nn
 from torch.utils.data import Dataset, DataLoader
 import os
 from tqdm import tqdm
-from models.autoencoder import MultichannelAutoEncoder, GatedMultichannelAutoEncoder
+from models.autoencoder import MultichannelAutoencoder, GatedMultichannelAutoencoder
 
 
 class FeatureDataset(Dataset):
@@ -39,16 +39,16 @@ class FeatureDataset(Dataset):
 
 if __name__ == '__main__':
     data_file = os.path.join('..', 'data', 'glove.300d.vgg.512d.txt')
-    state_dir = os.path.join('..', 'result')
+    state_dir = os.path.join('..', 'state')
     batch_size = 64
-    num_epochs = 300
+    num_epochs = 500
     lr = 1e-3
 
     word_dim = 300
     word_dim1 = 200
     word_dim2 = 150
     image_dim = 512
-    image_dim1 = 200
+    image_dim1 = 300
     image_dim2 = 150
     multi_dim = 300
 
@@ -57,7 +57,7 @@ if __name__ == '__main__':
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-    autoencoder = GatedMultichannelAutoEncoder(word_dim, word_dim1, word_dim2, image_dim, image_dim1, image_dim2, multi_dim).to(device)
+    autoencoder = GatedMultichannelAutoencoder(word_dim, word_dim1, word_dim2, image_dim, image_dim1, image_dim2, multi_dim).to(device)
     optimizer = torch.optim.Adam(autoencoder.parameters(), lr=lr)
     loss_func = nn.MSELoss()
 
@@ -83,6 +83,5 @@ if __name__ == '__main__':
 
     torch.save(
         autoencoder.state_dict(),
-        os.path.join(state_dir, autoencoder.__class__.__name__ + '.pth')
+        os.path.join(state_dir, autoencoder.__class__.__name__ + '.pt')
     )
-

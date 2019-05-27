@@ -1,28 +1,20 @@
 import numpy as np
+import torch
+from torchtext import vocab
 import os
 from utils.utils import *
 
-
-def load_word_vecs(file):
-    word_vecs = {}
-    with open(file) as f:
-        for l in f:
-            word, word_vec = l.strip().split(' ', 1)
-            word_vecs[word] = np.array(word_vec.split(), dtype='float')
-    return word_vecs
-
-
 if __name__ == '__main__':
-    # word_file = os.path.join('..', 'data', 'glove.840B.300d', 'glove.840B.300d.txt')
-    word_file = os.path.join('..', 'result', 'GatedMultichannelAutoEncoder.txt')
-
-    word_sim_files = ['men-3k.txt', 'simple-999.txt', 'sensim.txt', 'vissim.txt.', 'simverb-3500.txt',
+    word_sim_files = ['men-3k.txt', 'simlex-999.txt', 'sensim.txt', 'vissim.txt.', 'simverb-3500.txt',
                   'wordsim353.txt', 'wordrel353.txt', 'association.dev.txt', 'association.dev.b.txt']
-    word_sim_file = os.path.join('..', 'evaluation', word_sim_files[0])
+    word_sim_file = os.path.join('..', 'evaluation', word_sim_files[1])
 
     print("Loading word vectors...")
 
-    word_vecs = load_word_vecs(word_file)
+    glove = vocab.GloVe()
+    word_vecs = {word: glove[word] for word in glove.stoi}
+
+    # word_vecs = torch.load(os.path.join('..', 'result', 'glove.300d.GatedMultichannelAutoencoder.pt'))
 
     print("Calculating spearmans rho...")
 

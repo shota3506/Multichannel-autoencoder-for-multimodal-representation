@@ -9,9 +9,9 @@ def init_weights(m):
         init.constant_(m.bias.data, val=0)
 
 
-class MultichannelAutoEncoder(nn.Module):
+class MultichannelAutoencoder(nn.Module):
     def __init__(self, word_dim, word_dim1, word_dim2, image_dim, image_dim1, image_dim2, multi_dim):
-        super(MultichannelAutoEncoder, self).__init__()
+        super(MultichannelAutoencoder, self).__init__()
         self.wdim = word_dim
         self.wdim1 = word_dim1
         self.wdim2 = word_dim2
@@ -88,13 +88,13 @@ class MultichannelAutoEncoder(nn.Module):
 
         decoded = self.multi_decoder(encoded)
         decoded_word = self.word_decoder(decoded[:, :self.wdim2])
-        decoded_image = self.image_decoder(decoded[:, -self.idim2:])
+        decoded_image    = self.image_decoder(decoded[:, -self.idim2:])
         return decoded_word, decoded_image, encoded, mapped_image
 
 
-class GatedMultichannelAutoEncoder(nn.Module):
+class GatedMultichannelAutoencoder(nn.Module):
     def __init__(self, word_dim, word_dim1, word_dim2, image_dim, image_dim1, image_dim2, multi_dim):
-        super(GatedMultichannelAutoEncoder, self).__init__()
+        super(GatedMultichannelAutoencoder, self).__init__()
         self.wdim = word_dim
         self.wdim1 = word_dim1
         self.wdim2 = word_dim2
